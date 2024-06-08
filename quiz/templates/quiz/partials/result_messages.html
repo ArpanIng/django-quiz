@@ -1,0 +1,47 @@
+{% load static %}
+
+{% if passed %}
+<div class="bg-success py-4 bg-opacity-10">
+{% else %}
+<div class="bg-danger py-4 bg-opacity-10">
+{% endif %}
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-1 d-flex justify-content-center pt-2">
+        {% if passed %}
+        <svg width="50" height="50" fill="currentColor" class="bi bi-check2 text-success" viewBox="0 0 16 16">
+          <use xlink:href="{% static 'quiz/img/svgs/check2.svg' %}#check2" />
+        </svg>
+        {% else %}
+        <svg width="40" height="40" fill="currentColor" class="bi bi-x-lg text-danger" viewBox="0 0 16 16">
+          <use xlink:href="{% static 'quiz/img/svgs/x-lg.svg' %}#x-lg" />
+        </svg>
+        {% endif %}
+      </div>
+
+      <div class="col-lg-10">
+        <div class="row">
+          <div class="col-lg-10">
+            <b class="fs-2">{% if passed %}Congratulations! You passed!{% else %}Sorry! You failed!{% endif %}</b>
+            <p>
+              <span class="fw-semibold">TO PASS</span>
+              {{ quiz.pass_percentage }} % or higher
+            </p>
+            <p>
+              <span class="fw-semibold">{{ score }}/{{ total_questions }}</span>
+              correctly answered
+            </p>
+          </div>
+          <div class="col-lg-2 pt-4 ps-4">
+            <button type="button" id="keep-learning-btn" class="btn btn-primary rounded-0 fw-semibold">Keep Learning</button>
+          </div>
+        </div> 
+      </div>
+        
+      <div class="col-lg-1 border-start border-2">
+        <h6 class="text-uppercase fw-bold mt-4">Grade</h6>
+        <h3 class="text-{% if passed %}success{% else %}danger{% endif %}">{{ percentage_score }}%</h3>
+      </div>
+    </div>
+  </div>
+</div>

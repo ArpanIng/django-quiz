@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="py-4">
+  <p>
+    <span class="fw-bold">QUIZ</span>&nbsp;&#x2022;&nbsp;<span class="fw-bold"
+      >{{ quiz.duration_in_minutes }} MIN</span
+    >
+  </p>
+  <h1 class="fw-bold">Assessment</h1>
+</div>
+<hr />
+<div class="row border-bottom border-1 py-4 justify-content-end">
+  <div class="col-lg-11">
+    <p class="fw-semibold pt-2">Submit your assignment</p>
+  </div>
+  <div class="col-lg-1">
+    <button id="start-btn" class="btn btn-primary rounded-0 mt-1">Start</button>
+  </div>
+</div>
+<div class="row d-flex py-4 border-bottom border-1">
+  <div class="col-lg-8">
+    <p class="fw-semibold">Receive grade</p>
+    <p>
+      <span class="fw-semibold">TO PASS</span>
+      {{ quiz.pass_percentage }}% or higher
+    </p>
+  </div>
+  <div class="col-lg-4 border-start">
+    <p class="fw-semibold">Grade</p>
+    {% if quiz_score %}
+    <p>{{ quiz_score }}%</p>
+    {% endif %}
+  </div>
+</div>
+
+{% comment %} {% for data in quiz.get_results %}
+{{data.user}}
+<br>
+{{data.score}}
+{% endfor %} {% endcomment %}
+{% endblock content %}
+
+
+{% block scripts %}
+<script>
+  const startBtn = document.getElementById("start-btn");
+  const url = window.location.href;
+
+  startBtn.addEventListener("click", () => {
+    window.location.href = `${url}attempt/`;
+  });
+</script>
+{% endblock scripts %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="h1 py-4 mb-4 border-bottom">Categories</div>
+
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 py-5">
+  <div class="col d-flex align-items-start">
+    <div class="border rounded-4 px-2 pt-2 text-white text-shadow-4 bg-success">
+      {% comment %} <h3 class="fw-bold mb-0 fs-4 text-body-emphasis">Programming</h3> {% endcomment %}
+      <h3 class="my-4 display-6 lh-1 fw-bold text-align-center">Another longer title belongs here</h3>
+    </div>
+  </div>
+
+  <div class="col d-flex align-items-start">
+    <div class="border rounded-4 px-2 pt-2 text-white text-shadow-4 bg-success">
+      <h3 class="my-4 display-6 lh-1 fw-bold text-align-center">Another longer</h3>
+    </div>
+  </div>
+</div>
+{% endblock content %}

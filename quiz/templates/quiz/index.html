@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="h1 py-4 mb-4 border-bottom">Quizzes</div>
+
+<div class="row g-3">
+  <div class="col-sm-7">
+    <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" action="{% url 'quiz:quiz_list' %}" method="get" role="search">
+      <input type="search" name="q" class="form-control" placeholder="Search questions" aria-label="Search">
+    </form>
+  </div>
+  <div class="col-sm">
+    <select class="form-select" id="validationDefault04" required>
+      <option selected disabled value="">Difficulty</option>
+      <option>lorem</option>
+      <option>ipsum</option>
+    </select>
+  </div>
+  <div class="col-sm">
+    <select class="form-select" id="validationDefault04" required>
+      <option selected disabled value="">Category</option>
+      <option>lorem</option>
+      <option>ipsum</option>
+    </select>
+  </div>
+  <div class="col-sm">
+    <button type="submit" class="btn btn-primary rounded-0">Filter</button>
+  </div>
+</div>
+
+<div class="py-4">
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <th scope="col"></th>
+        <th scope="col">Quiz</th>
+        <th scope="col">Difficulty</th>
+        <th scope="col">Category</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for quiz in quizzes %}
+      <tr>
+        <th style="width: 18px">
+          <svg width="18" height="18" fill="currentColor" class="bi bi-file-earmark-text" viewBox="0 0 16 16">
+            <use xlink:href="{% static 'quiz/img/svgs/file-earmark-text.svg' %}#file-earmark-text" />
+          </svg>
+        </th>
+        <td><a href="{{ quiz.get_assessment_url }}" class="text-decoration-none text-muted link-primary">{{ quiz.name }}</a></td>
+        <td>
+          {% if quiz.difficulty_level == "EASY" %}
+            <span class="text-success">Easy</span>
+          {% elif quiz.difficulty_level == "MEDIUM" %}
+            <span class="text-warning">Medium</span>
+          {% elif quiz.difficulty_level == "HARD" %}
+            <span class="text-danger">Hard</span>
+          {% endif %}
+        </td>
+        <td>
+          <span class="text-muted">Programming</span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- pagination -->
+<div class="d-flex justify-content-center mt-2">
+  {% include 'partials/pagination.html' %}
+</div>
+<!-- pagination end -->
+{% endblock content %}
