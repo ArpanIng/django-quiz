@@ -6,9 +6,20 @@ class QuizForm(forms.Form):
         questions = kwargs.pop("questions", [])
         super(QuizForm, self).__init__(*args, **kwargs)
         for question in questions:
-            choice_list = [(answer.id, answer.text) for answer in question.get_answers()]
+            choice_list = [
+                (answer.id, answer.text) for answer in question.get_answers()
+            ]
             self.fields[f"question_{question.id}"] = forms.ChoiceField(
                 label=question.text,
                 choices=choice_list,
                 widget=forms.RadioSelect(attrs={"class": "form-check-input"}),
             )
+
+
+class QuizSearchForm(forms.Form):
+    q = forms.CharField(
+        required=False,
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "placeholder": "Search questions"}
+        ),
+    )

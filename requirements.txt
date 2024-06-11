@@ -6,6 +6,7 @@ decorator==5.1.1
 Django==4.2.13
 django-crispy-forms==2.1
 django-debug-toolbar==4.4.2
+django-filter==24.2
 executing==2.0.1
 factory-boy==3.3.0
 Faker==25.5.0

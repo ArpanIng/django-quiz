@@ -3,32 +3,13 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<div class="h1 py-4 mb-4 border-bottom">Quizzes</div>
-
-<div class="row g-3">
-  <div class="col-sm-7">
-    <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" action="{% url 'quiz:quiz_list' %}" method="get" role="search">
-      <input type="search" name="q" class="form-control" placeholder="Search questions" aria-label="Search">
-    </form>
-  </div>
-  <div class="col-sm">
-    <select class="form-select" id="validationDefault04" required>
-      <option selected disabled value="">Difficulty</option>
-      <option>lorem</option>
-      <option>ipsum</option>
-    </select>
-  </div>
-  <div class="col-sm">
-    <select class="form-select" id="validationDefault04" required>
-      <option selected disabled value="">Category</option>
-      <option>lorem</option>
-      <option>ipsum</option>
-    </select>
-  </div>
-  <div class="col-sm">
-    <button type="submit" class="btn btn-primary rounded-0">Filter</button>
-  </div>
+<div class="h1 py-4 mb-4 border-bottom">
+  <a href="{% url 'quiz:quiz_list' %}" class="fw-semibold text-dark text-decoration-none">Quizzes</a>
 </div>
+
+<!-- quiz filters -->
+{% include 'quiz/partials/filters.html' %}
+<!-- quiz filters end -->
 
 <div class="py-4">
   <table class="table table-hover">
@@ -58,10 +39,12 @@
             <span class="text-danger">Hard</span>
           {% endif %}
         </td>
-        <td>
-          <span class="text-muted">Programming</span>
-        </td>
+        <td><a href="{% url 'quiz:quiz_list_by_category' quiz.category.id %}" class="text-decoration-none text-muted link-primary">
+          {{ quiz.category }}
+        </a></td>
       </tr>
+      {% empty %}
+      <p class="px-2 fw-semibold fs-5">No quiz found.</p>
       {% endfor %}
     </tbody>
   </table>

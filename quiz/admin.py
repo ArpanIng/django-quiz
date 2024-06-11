@@ -14,6 +14,7 @@ class QuizModelAdmin(admin.ModelAdmin):
         "pass_percentage",
         "duration_in_minutes",
         "difficulty_level",
+        "category",
     ]
     list_filter = ["difficulty_level"]
     search_fields = ["name"]

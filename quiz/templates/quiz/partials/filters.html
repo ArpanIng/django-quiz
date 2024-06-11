@@ -1,0 +1,21 @@
+<div class="row g-3">
+  <div class="col-sm-7">
+    <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" action="" method="get" role="search">
+      {% for field in search_form %}
+      {{ field }}
+      {% endfor %}
+    </form>
+  </div>
+  <div class="col-sm-5">
+    <form class="row g-3" method="get">
+      <div class="col-sm-4">
+        {% for field in filter.form %}
+        {{ field }}
+        {% endfor %}
+      </div>
+      <div class="col-auto">
+        <button type="submit" class="btn btn-primary rounded-0">Filter</button>
+      </div>
+    </form>
+  </div>
+</div>
