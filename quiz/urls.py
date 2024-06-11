@@ -21,5 +21,4 @@ urlpatterns = [
         views.QuizView.as_view(),
         name="quiz_assessment_attempt",
     ),
-    path("<int:pk>/assessment/attempt/submit/", views.submit_quiz, name="quiz_submit"),
 ]

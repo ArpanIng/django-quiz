@@ -1,10 +1,11 @@
 import random
 
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.urls import reverse
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.core.exceptions import ValidationError
+
 
 class Category(models.Model):
     name = models.CharField(max_length=255)
@@ -36,7 +37,7 @@ class Quiz(models.Model):
         help_text="Required pass score in percentage.",
     )
     difficulty_level = models.CharField(max_length=6, choices=DifficultyLevel.choices)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='quizzes')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="quizzes")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -63,7 +64,9 @@ class Quiz(models.Model):
             raise ValidationError({"pass_percentage": easy_level_message})
 
     def save(self, *args, **kwargs):
-        self.full_clean()  # call the clean method
+        # call the clean method
+        # With this wherever you create your object (form, view, shell, test) the validation will be called.
+        self.full_clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -80,13 +83,20 @@ class Quiz(models.Model):
         random.shuffle(questions)
         return questions[:self.number_of_questions]
 
-    def get_questions_count(self):
-        return self.questions.count()
-
 
 class Question(models.Model):
+    class QuestionType(models.TextChoices):
+        MULTIPLE_CHOICE = "MC", "Multiple Choice"  # radio
+        MULTI_SELECT_MULTIPLE_CHOICE = "MSMC", "Multi select Multiple Choice"  # checkbox
+        TRUE_OR_FALSE = "TF", "True or False"  # radio
+
     text = models.CharField(max_length=255)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions")
+    question_type = models.CharField(
+        max_length=4,
+        choices=QuestionType.choices,
+        default=QuestionType.MULTIPLE_CHOICE,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

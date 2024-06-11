@@ -4,9 +4,9 @@
 {% block content %}
 <div class="py-4">
   <p>
-    <span class="fw-bold">QUIZ</span>&nbsp;&#x2022;&nbsp;<span class="fw-bold"
-      >{{ quiz.duration_in_minutes }} MIN</span
-    >
+    <span class="fw-bold">QUIZ</span>&nbsp;&#x2022;&nbsp;<span class="fw-bold">
+      {{ quiz.duration_in_minutes }} MIN
+    </span>
   </p>
   <h1 class="fw-bold">Assessment</h1>
 </div>
@@ -29,9 +29,7 @@
   </div>
   <div class="col-lg-4 border-start">
     <p class="fw-semibold">Grade</p>
-    {% if quiz_score %}
-    <p>{{ quiz_score }}%</p>
-    {% endif %}
+    0
   </div>
 </div>
 

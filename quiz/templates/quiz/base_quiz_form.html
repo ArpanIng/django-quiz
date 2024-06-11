@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block header %}
+<nav class="navbar sticky-top bg-body-tertiary border-bottom border-1 border-secondary">
+  <div class="container-fluid">
+    <div class="d-flex px-4" style="height: 60px;">
+      <a class="px-4 my-2 pt-1 link-dark" href="{{ request.META.HTTP_REFERER }}">
+        <svg width="34" height="34" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+          <use xlink:href="{% static 'quiz/img/svgs/arrow-left.svg' %}#arrow-left" />
+        </svg>
+      </a>
+      <div class="d-flex flex-column">
+        <span class="fs-4 fw-semibold text-secondary">{{ quiz.name }}</span>
+        <span class="text-secondary">{{ quiz.duration_in_minutes }} min</span>
+      </div>
+    </div>
+  </div>
+</nav>
+{% endblock header %}
+
+{% block content %}
+<div class="row">
+  <div class="col">
+    <b class="fs-2">{{ quiz }}</b>
+    <p class="text-uppercase text-muted fw-semibold">Total Questions {{ quiz.get_questions_count }}</p>
+  </div>
+</div>
+<hr>
+<div class="pb-4">
+{% block quiz_form %} {% endblock quiz_form %}
+</div>
+{% endblock content %}
