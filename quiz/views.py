@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Max
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404
 from django.views.generic.base import View
@@ -35,7 +36,18 @@ class QuizListView(FilterView):
     template_name = "quiz/index.html"
 
     def get_queryset(self):
-        queryset = Quiz.objects.all().select_related("category").order_by("id")
+        queryset = Quiz.objects.all().select_related("category")
+        if "popular" in self.kwargs:
+            queryset = queryset.order_by("-popularity")
+        else:
+            queryset = queryset.order_by("id")
+
+        # sort quiz by name
+        order = self.request.GET.get("o")  
+        if order == "name": # ascending order
+            queryset = queryset.order_by("name")
+        elif order == "-name":  # descending order
+            queryset = queryset.order_by("-name")
 
         # filter quiz based on search params
         query = self.request.GET.get("q")
@@ -51,13 +63,11 @@ class QuizListView(FilterView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        current_order = self.request.GET.get("o")
+        context["toggle_order"] = "-name" if current_order == "name" else "name"
+        context["popular"] = "popular" in self.kwargs
         context["search_form"] = QuizSearchForm()
         return context
-
-
-# def get_random_quiz(request):
-# # quizzes = Quiz.objects.all()
-# return render()
 
 
 class QuizAssessmentResultView(DetailView):
@@ -69,8 +79,13 @@ class QuizAssessmentResultView(DetailView):
         context = super().get_context_data(**kwargs)
         quiz = self.object
         user = self.request.user
-        # result = Result.objects.filter(quiz=quiz, user=user).last()
-        # context["quiz_score"] = result.score if result else None
+        if user.is_authenticated:
+            result = Result.objects.filter(quiz=quiz, user=user).select_related("user")
+            highest_score = result.aggregate(highest_score=Max("score", default=0))
+            quiz_score = highest_score["highest_score"] if result else 0
+            context["result"] = result
+            context["quiz_score"] = quiz_score
+            context['passed'] = quiz_score >= quiz.pass_percentage
         return context
 
 
@@ -87,7 +102,7 @@ class QuizAssessmentAttemptView(DetailView):
         questions = quiz.get_questions()
         context["form"] = QuizForm(questions=questions)
         context["questions"] = questions
-        context["total_questions"] = len(questions)
+        context["total_questions"] = quiz.get_questions_count()
         return context
 
 
@@ -122,17 +137,24 @@ class QuizAssessmentSubmissionFormView(SingleObjectMixin, FormView):
                 # only count score if all the submitted answers are correct without incorrect answer
                 if all(answer.is_correct for answer in selected_answers):
                     score += 1
-            else:  # both Multiple Choice and True/False question type
+            else:  # handles Multiple Choice question type
                 selected_answer_id = form.cleaned_data[f"question_{question.id}"]
                 selected_answer = get_object_or_404(Answer, id=selected_answer_id)
                 # convert the datatype 'str' into 'int'
                 submitted_answer_ids.append(int(selected_answer_id))
                 if selected_answer.is_correct:
-                    score += 1
+                    score += 1 
 
         total_questions = len(questions)
         score_percentage = round((score / total_questions) * 100, 2)
         passed = score_percentage >= quiz.pass_percentage
+
+        # Increment popularity counter after successful submission
+        quiz.popularity += 1
+        quiz.save()
+
+        # Log/save the result
+        Result.objects.get_or_create(quiz=quiz, user=self.request.user, score=score_percentage)
 
         context = {
             "quiz": quiz,

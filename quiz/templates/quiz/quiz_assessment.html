@@ -12,11 +12,13 @@
 </div>
 <hr />
 <div class="row border-bottom border-1 py-4 justify-content-end">
-  <div class="col-lg-11">
+  <div class="col-lg-10">
     <p class="fw-semibold pt-2">Submit your assignment</p>
   </div>
-  <div class="col-lg-1">
-    <button id="start-btn" class="btn btn-primary rounded-0 mt-1">Start</button>
+  <div class="col-lg-2">
+    <button id="start-btn" class="btn btn-primary rounded-0 mt-1">
+      {% if result %}Try Again{% else %}Start{% endif %}
+    </button>
   </div>
 </div>
 <div class="row d-flex py-4 border-bottom border-1">
@@ -29,15 +31,20 @@
   </div>
   <div class="col-lg-4 border-start">
     <p class="fw-semibold">Grade</p>
-    0
+    {% if request.user.is_authenticated %}
+      {% if result %}  <!-- user has submission data -->
+      <div class="text-{% if passed %}success{% else %}danger{% endif %}">
+        <span>{{ quiz_score }}%</span>
+        <p class="fs-5">{% if passed %}Passed{% else %}Failed{% endif %}</p>
+      </div>
+      {% else %}
+      <span>0</span>
+      {% endif %}
+    {% else %}  <!-- anonymous user -->
+    <span>0</span>
+    {% endif %}
   </div>
 </div>
-
-{% comment %} {% for data in quiz.get_results %}
-{{data.user}}
-<br>
-{{data.score}}
-{% endfor %} {% endcomment %}
 {% endblock content %}
 
 

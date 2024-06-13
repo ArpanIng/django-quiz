@@ -36,6 +36,7 @@ class Quiz(models.Model):
         validators=[MinValueValidator(40), MaxValueValidator(90)],
         help_text="Required pass score in percentage.",
     )
+    popularity = models.PositiveIntegerField(default=0)
     difficulty_level = models.CharField(max_length=6, choices=DifficultyLevel.choices)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name="quizzes")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -44,6 +45,9 @@ class Quiz(models.Model):
     class Meta:
         verbose_name = "Quiz"
         verbose_name_plural = "Quizzes"
+        indexes = [
+            models.Index(fields=["popularity"]),
+        ]
 
     def clean(self):
         hard = self.DifficultyLevel.HARD
@@ -83,12 +87,14 @@ class Quiz(models.Model):
         random.shuffle(questions)
         return questions[:self.number_of_questions]
 
+    def get_questions_count(self):
+        return self.questions.count()
+
 
 class Question(models.Model):
     class QuestionType(models.TextChoices):
-        MULTIPLE_CHOICE = "MC", "Multiple Choice"  # radio
+        MULTIPLE_CHOICE = "MC", "Multiple Choice"  # radio (single answer)
         MULTI_SELECT_MULTIPLE_CHOICE = "MSMC", "Multi select Multiple Choice"  # checkbox
-        TRUE_OR_FALSE = "TF", "True or False"  # radio
 
     text = models.CharField(max_length=255)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions")
@@ -116,6 +122,10 @@ class Answer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        # Ensure the same answer isn't added multiple times
+        unique_together = ("question", "text")
+
     def __str__(self):
         return self.text
 
@@ -124,6 +134,7 @@ class Result(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="results")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     score = models.FloatField()
+    submitted_date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"User: {self.user}, score: {self.score}"

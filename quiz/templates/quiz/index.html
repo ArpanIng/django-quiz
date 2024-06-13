@@ -4,7 +4,13 @@
 
 {% block content %}
 <div class="h1 py-4 mb-4 border-bottom">
+  {% if popular %}
+  <a href="{% url 'quiz:quiz_list_by_popularity' %}" class="fw-semibold text-dark text-decoration-none">
+    Popular Quizzes
+  </a>
+  {% else %}
   <a href="{% url 'quiz:quiz_list' %}" class="fw-semibold text-dark text-decoration-none">Quizzes</a>
+  {% endif %}
 </div>
 
 <!-- quiz filters -->
@@ -16,7 +22,28 @@
     <thead>
       <tr>
         <th scope="col"></th>
-        <th scope="col">Quiz</th>
+        <th scope="col">
+          <div class="d-flex justify-content-between align-items-center">
+            <a href="?o={{ toggle_order }}" class="text-decoration-none text-dark">Quiz</a>
+            <div>
+              {% if request.GET.o == 'name' %}
+              <span>
+                <a href="?o=-name" class="text-dark">
+                  <svg width="14" height="14" fill="currentColor" class="bi bi-caret-up-fill" viewBox="0 0 16 16">
+                    <use xlink:href="{% static 'quiz/img/svgs/caret-up-fill.svg' %}#caret-up-fill" />
+                  </svg>
+                </a>
+                {% elif request.GET.o == '-name' %}
+                <a href="?o=name" class="text-dark">
+                  <svg width="14" height="14" fill="currentColor" class="bi bi-caret-down-fill" viewBox="0 0 16 16">
+                    <use xlink:href="{% static 'quiz/img/svgs/caret-down-fill.svg' %}#caret-down-fill" />
+                  </svg>
+                </a>
+              </span>
+              {% endif %}
+            </div>
+          </div>
+        </th>
         <th scope="col">Difficulty</th>
         <th scope="col">Category</th>
       </tr>

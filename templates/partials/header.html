@@ -5,6 +5,7 @@
       <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
         <li><a href="/" class="nav-link px-2 link-secondary">Quiz App</a></li>
         <li><a href="{% url 'quiz:category_list' %}" class="nav-link px-2 link-body-emphasis">Category</a></li>
+        <li><a href="{% url 'quiz:quiz_list_by_popularity' %}" class="nav-link px-2 link-body-emphasis">Popular</a></li>
       </ul>
 
       {% if request.user.is_authenticated %}
