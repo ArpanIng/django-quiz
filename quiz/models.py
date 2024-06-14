@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 
 
@@ -86,9 +87,41 @@ class Quiz(models.Model):
         questions = list(self.questions.prefetch_related("answers"))
         random.shuffle(questions)
         return questions[:self.number_of_questions]
+    
+    def calculate_score(self, cleaned_data):
+        questions = self.get_questions()
+        score = 0
+        submitted_answers_ids = []
 
-    def get_questions_count(self):
-        return self.questions.count()
+        for question in questions:
+            if question.question_type == Question.QuestionType.MULTI_SELECT_MULTIPLE_CHOICE:
+                selected_answer_ids = cleaned_data[f"question_{question.id}"]
+                selected_answers = [get_object_or_404(Answer, id=answer_id) for answer_id in selected_answer_ids]
+                submitted_answers_ids.extend(map(int, selected_answer_ids))
+                # only count score if all the submitted answers are correct without incorrect answer
+                if all(answer.is_correct for answer in selected_answers):
+                    score += 1
+            else:  # handles Multiple Choice question type
+                selected_answer_id = cleaned_data[f"question_{question.id}"]
+                selected_answer = get_object_or_404(Answer, id=selected_answer_id)
+                # convert the datatype 'str' into 'int'
+                submitted_answers_ids.append(int(selected_answer_id))
+                if selected_answer.is_correct:
+                    score += 1
+        
+        total_questions = len(questions)
+        score_percentage = round((score / total_questions) * 100, 2)
+        passed = score_percentage >= self.pass_percentage
+
+        return score, score_percentage, passed, submitted_answers_ids
+
+    def increment_popularity(self):
+        self.popularity += 1
+        self.save()
+    
+    def save_result(self, user, score):
+        result = Result.objects.get_or_create(quiz=self, user=user, score=score)
+        return result
 
 
 class Question(models.Model):

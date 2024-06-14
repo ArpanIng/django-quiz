@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Max
 from django.http import HttpResponseForbidden
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 from django.views.generic.base import View
 from django.views.generic.detail import DetailView, SingleObjectMixin
 from django.views.generic.edit import FormView
@@ -12,7 +12,7 @@ from django_filters.views import FilterView
 
 from .filters import QuizFilter
 from .forms import QuizForm, QuizSearchForm
-from .models import Category, Question, Quiz, Answer, Result
+from .models import Category, Quiz, Result
 
 User = get_user_model()
 
@@ -71,6 +71,8 @@ class QuizListView(FilterView):
 
 
 class QuizAssessmentResultView(DetailView):
+    """Display quiz detail and user's result."""
+    
     model = Quiz
     context_object_name = "quiz"
     template_name = "quiz/quiz_assessment.html"
@@ -102,7 +104,7 @@ class QuizAssessmentAttemptView(DetailView):
         questions = quiz.get_questions()
         context["form"] = QuizForm(questions=questions)
         context["questions"] = questions
-        context["total_questions"] = quiz.get_questions_count()
+        context["total_questions"] = len(questions)
         return context
 
 
@@ -124,45 +126,24 @@ class QuizAssessmentSubmissionFormView(SingleObjectMixin, FormView):
         Validate the form data and calculate the quiz score.
         """
 
-        quiz = self.object
+        quiz = self.get_object()
         questions = quiz.get_questions()
-        score = 0
-        submitted_answer_ids = []
-
-        for question in questions:
-            if question.question_type == Question.QuestionType.MULTI_SELECT_MULTIPLE_CHOICE:
-                selected_answer_ids = form.cleaned_data[f"question_{question.id}"]
-                selected_answers = [get_object_or_404(Answer, id=answer_id) for answer_id in selected_answer_ids]
-                submitted_answer_ids.extend(map(int, selected_answer_ids))
-                # only count score if all the submitted answers are correct without incorrect answer
-                if all(answer.is_correct for answer in selected_answers):
-                    score += 1
-            else:  # handles Multiple Choice question type
-                selected_answer_id = form.cleaned_data[f"question_{question.id}"]
-                selected_answer = get_object_or_404(Answer, id=selected_answer_id)
-                # convert the datatype 'str' into 'int'
-                submitted_answer_ids.append(int(selected_answer_id))
-                if selected_answer.is_correct:
-                    score += 1 
-
-        total_questions = len(questions)
-        score_percentage = round((score / total_questions) * 100, 2)
-        passed = score_percentage >= quiz.pass_percentage
-
+        score, score_percentage, passed, submitted_answers_ids = quiz.calculate_score(form.cleaned_data)
+        
         # Increment popularity counter after successful submission
-        quiz.popularity += 1
-        quiz.save()
+        quiz.increment_popularity()
 
         # Log/save the result
-        Result.objects.get_or_create(quiz=quiz, user=self.request.user, score=score_percentage)
+        quiz.save_result(user=self.request.user, score=score_percentage)
 
         context = {
             "quiz": quiz,
+            "questions": questions,
             "score_percentage": score_percentage,
-            "total_questions": total_questions,
+            "total_questions": len(questions),
             "score": score,
             "passed": passed,
-            "submitted_answer_ids": submitted_answer_ids,
+            "submitted_answers_ids": submitted_answers_ids,
         }
         return render(self.request, "quiz/quiz_result.html", context)
     

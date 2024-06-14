@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "crispy_bootstrap5",
     "debug_toolbar",
     "django_filters",
+    "django_extensions",
 ]
 
 MIDDLEWARE = [
@@ -162,3 +163,6 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 LOGIN_URL = "accounts:login"
 LOGIN_REDIRECT_URL = "quiz:quiz_list"
 LOGOUT_REDIRECT_URL = "quiz:quiz_list"
+
+# print SQL queries in shell_plus
+SHELL_PLUS_PRINT_SQL = True
